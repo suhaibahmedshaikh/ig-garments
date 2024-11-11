@@ -1,4 +1,6 @@
 import express from "express";
+import userRoutes from "./routes/user-router.js";
+
 const app = express();
 
 // utils
@@ -8,9 +10,12 @@ import connectDB from "./configs/dbConfig.js";
 //
 connectDB();
 
-app.get("/", (req, res) => {
-  res.send("Hello from Backend");
-});
+// middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.use("/api/user", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT: ${PORT}`);
