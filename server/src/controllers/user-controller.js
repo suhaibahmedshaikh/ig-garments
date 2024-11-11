@@ -1,4 +1,5 @@
 import User from "../models/user-model.js";
+import bcrypt from "bcryptjs";
 
 const createUser = async (req, res) => {
   const { username, email, password } = req.body;
@@ -9,9 +10,12 @@ const createUser = async (req, res) => {
 
   const isUserExists = await User.findOne({ email });
 
-  if (isUserExists) res.status(400).send("User already exists");
+  if (isUserExists) return res.status(400).send("User already exists");
 
-  const newUser = new User({ username, email, password });
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const newUser = new User({ username, email, password: hashedPassword });
 
   try {
     await newUser.save();
@@ -22,8 +26,9 @@ const createUser = async (req, res) => {
       isAdmin: newUser.isAdmin,
     });
   } catch (error) {
-    res.status(400);
-    throw new Error("Invalid user data");
+    res.status(400).send({
+      message: error,
+    });
   }
 };
 
